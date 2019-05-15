@@ -4,15 +4,12 @@ import time
 
 def decodeRaw2Int(input_data):
     x,y,z = input_data.decode().split(',')
-    
-    
     return (x,y,z)
-    
 
 
 if __name__ == "__main__":
     print("Start")
-    port="/dev/rfcomm1" #This will be different for various devices and on windows it will probably be a COM port.
+    port="/dev/rfcomm0" #This will be different for various devices and on windows it will probably be a COM port.
 
     bluetooth=serial.Serial(port, 115200)#Start communications with the bluetooth unit
 
