@@ -22,10 +22,6 @@ extern "C" {
 
 #include "sdkconfig.h"
 
-static char LOG_TAG[] = "SampleWrite";
-
-// See the following for generating UUIDs:
-// https://www.uuidgenerator.net/
 
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_RECEIVE_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
@@ -82,18 +78,5 @@ void SampleWrite(void)
 } // app_main
 
 void app_main(void) {
-	//Sample_MLE_15();
-	//Sample1();
-	//SampleAsyncScan();
-	// SampleClient();
-	// SampleClient_Notify();
-	//SampleClientAndServer();
-	//SampleClientDisconnect();
-	//SampleClientWithWiFi();
-	//SampleNotify();
-	//SampleRead();
-	//SampleSensorTag();
-	//SampleScan();
-	// SampleServer();
 	SampleWrite();
 } // app_main
