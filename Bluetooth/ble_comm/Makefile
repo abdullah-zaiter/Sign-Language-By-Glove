@@ -5,6 +5,6 @@
 
 PROJECT_NAME := ble-comm
 
-COMPONENT_ADD_INCLUDEDIRS := components/include
+#COMPONENT_ADD_INCLUDEDIRS := components/include
 
-include ./project.mk
+include $(IDF_PATH)/make/project.mk

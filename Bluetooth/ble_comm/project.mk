@@ -373,7 +373,7 @@ COMMON_WARNING_FLAGS = -Wall -Werror=all \
 	-Wno-error=unused-variable \
 	-Wno-error=deprecated-declarations \
 	-Wextra \
-	-Wno-error=catch-value\
+	#-Wno-error=catch-value\
 	-Wno-unused-parameter -Wno-sign-compare
 
 ifdef CONFIG_COMPILER_DISABLE_GCC8_WARNINGS
