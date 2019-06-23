@@ -21,22 +21,50 @@ extern "C" {
 #include "GeneralUtils.h"
 
 #include "sdkconfig.h"
+#include "driver/gpio.h"
+#include "I2Cbus.hpp"
+#include "MPU.hpp"
+#include "mpu/math.hpp"
+#include "mpu/types.hpp"
+#include "SensorDataType.h"
 
 
 #define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_RECEIVE_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 #define CHARACTERISTIC_SEND_UUID "beb5483e-36e1-4688-b7f5-ea07361b26aa"
 
+static constexpr gpio_num_t AD0 = GPIO_NUM_5;
+static constexpr gpio_num_t SDA = GPIO_NUM_18;
+static constexpr gpio_num_t SCL = GPIO_NUM_19;
+static constexpr uint32_t CLOCK = 400000;  // range from 100 KHz ~ 400Hz
+
 bool start_transmission = false;
 
 class MyCallbacks: public BLECharacteristicCallbacks {
 	void onWrite(BLECharacteristic *pCharacteristic) {
-		start_transmission = true;
+		start_transmission = !start_transmission;
 	}
 };
 
-
 static void run() {
+	i2c0.begin(SDA, SCL, CLOCK);  // initialize the I2C bus
+	MPU_t MPU;         // create an object
+	MPU.setBus(i2c0);  // set communication bus, for SPI -> pass 'hspi'
+	MPU.setAddr(mpud::MPU_I2CADDRESS_AD0_LOW);  // set address or handle, for SPI -> pass 'mpu_spi_handle'
+	MPU.testConnection();  // test connection with the chip, return is a error code
+	MPU.initialize();  // this will initialize the chip and set default configurations
+	MPU.setSampleRate(250);  // in (Hz)
+	MPU.setAccelFullScale(mpud::ACCEL_FS_4G);
+	MPU.setGyroFullScale(mpud::GYRO_FS_500DPS);
+	MPU.setDigitalLowPassFilter(mpud::DLPF_42HZ);  // smoother data
+	MPU.setInterruptEnabled(mpud::INT_EN_RAWDATA_READY);  // enable I	
+	gpio_pad_select_gpio(AD0);
+	gpio_set_direction(AD0, GPIO_MODE_OUTPUT);
+	gpio_set_level(AD0,false);
+	SensorData sensors[SENSORS_QUANTITY];
+	
+
+	//////////////////
 	GeneralUtils::dumpInfo();
 	BLEDevice::init("ESP32");
 	BLEServer *pServer = BLEDevice::createServer();
@@ -59,15 +87,26 @@ static void run() {
 
 	BLEAdvertising *pAdvertising = pServer->getAdvertising();
 	pAdvertising->start();
-	
-	
-	uint16_t i = 0;
+	uint16_t aux;
 	for (;!start_transmission;);
 	for (;;)
 	{
-		pCharacteristic_send->setValue(i);
-		i++;
-		vTaskDelay(200 / portTICK_PERIOD_MS);
+		// mpud::raw_axes_t accelRaw;     // holds x, y, z axes as int16
+		// mpud::raw_axes_t gyroRaw;      // holds x, y, z axes as int16
+
+		MPU.motion(&sensors[0].accelRaw, &sensors[0].gyroRaw);
+		
+		// printf("accel: %+d %+d %+d\n", accelRaw.x, accelRaw.y, accelRaw.z);
+		// printf("gyro: %+d %+d %+d\n", gyroRaw[0], gyroRaw[1], gyroRaw[2]);
+		mpud::float_axes_t accelG = mpud::accelGravity(sensors[0].accelRaw, mpud::ACCEL_FS_4G);  // raw data to gravity
+		mpud::float_axes_t gyroDPS = mpud::gyroDegPerSec(sensors[0].gyroRaw, mpud::GYRO_FS_500DPS);  // raw data to º/s
+		
+		// printf("accel: %+.2f %+.2f %+.2f\n", cacelG[0], accelG[1], accelG[2]);
+		// printf("gyro: %+.2f %+.2f %+.2f\n", gyroDPS.x, gyroDPS.y, gyroDPS.z);
+		aux = (uint16_t)sensors[0].gyroRaw[0];
+		printf("________aux = %d\n", sensors[0].gyroRaw[0]);
+		pCharacteristic_send->setValue(aux);
+		vTaskDelay(100 / portTICK_PERIOD_MS);
 	}
 }
 

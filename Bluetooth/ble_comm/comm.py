@@ -11,7 +11,9 @@ __version__ = "1.0"
 CHARACTERISTIC_SEND_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 CHARACTERISTIC_RECEIVE_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26aa"
 SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-ESP32_MAC = '80:7d:3a:99:df:66'
+#ESP32_MAC = '80:7d:3a:99:df:66'
+ESP32_MAC = '24:0A:C4:96:B1:C2'
+
 ADD_TYPE = 'public'
 
 def connect(mac, add_type):
@@ -69,7 +71,9 @@ if __name__ == "__main__":
         print(chrs[1].read())
         chrs[0].write(str.encode("start"))
         while True:
-            print(int.from_bytes(chrs[1].read(), byteorder='big'))
+            aux =chrs[1].read()
+            print("HERE!: ",aux )
+            print(int.from_bytes(aux, signed = True,byteorder='little'))
         # for ch in svc.getCharacteristics():
         #     print(f"\t{ch}, hnd={hex(ch.handle)}, supports {ch.propertiesToString()}")
         #     if (ch.supportsRead()):
