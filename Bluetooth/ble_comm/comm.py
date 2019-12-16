@@ -25,7 +25,6 @@ SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 ESP32_MAC = 'c4:4f:33:0c:c8:5B'#'C4:4F:33:0C:C8:5B'#'24:0A:C4:96:B1:C2'
 
 ADD_TYPE = 'public'
-SUM1TO100 = 4950
 
 
 def connect(mac, add_type):
@@ -96,25 +95,25 @@ if __name__ == "__main__":
             newAux = bytearray(aux)
 
             num = int.from_bytes(newAux[7:8], signed = True,byteorder='little')
+            print('HERE ',num)
             for j in range(30):
             #j = 7
                 num2 = int.from_bytes(newAux[j:j+1], signed = True,byteorder='little')
                 aux_print = "{0:0=4d}".format(num2)
                 if j == 7:
                     print("|", end = "")
-                print(aux_print, end = ",")
+                print(aux_print, end = "")
                 if j == 7:
                     print("|", end = "")
-                
-
             if lastnum!= num:
-                sum += num             
+                sum += 1             
             lastnum = num
             print("\n")
-        error = (sum)/SUM1TO100
+        
+        error = (sum)/100
         print("Acerto: ", error)
         elapsed_time = time.time() - t
-        print(elapsed_time)
+        print("Tempo decorrido: ", elapsed_time)
 
             #print("ELAPSED TIME: ", elapsed_time)
 
