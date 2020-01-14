@@ -4,6 +4,10 @@ import sys
 import time
     #For Time ellapsed analysis
 
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+
 __author__ = "Abdullah Zaiter"
 __copyright__ = "Copyright 2019, Sign-Language-By-Glove"
 __license__ = "MIT"
@@ -25,8 +29,40 @@ SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 ESP32_MAC = 'c4:4f:33:0c:c8:5B'#'C4:4F:33:0C:C8:5B'#'24:0A:C4:96:B1:C2'
 
 ADD_TYPE = 'public'
-SUM1TO100 = 4950
 
+name = 'Com_Sensores'
+# name = 'Sem_Sensores'
+
+def graphAcc(y, x):
+    # x = np.arange(100)
+    fig = plt.figure()
+    ax = plt.subplot(111)
+    ax.plot(x, y, label='$'+name)
+
+    plt.title('Pacotes Recebidos x Delay Entre 100 Pacotes de 30 bytes')
+    plt.xlabel('Delay(us)')
+    plt.ylabel('Pacotes Recebidos(%)')
+    fig.savefig('img/pacotesBLE'+name+'.png')
+
+def graphPyTime(y, x):
+    # x = np.arange(100)
+    fig = plt.figure()
+    ax = plt.subplot(111)
+    ax.plot(x, y, label='$'+name)
+
+    plt.title('Tempo Decorrido de Captura x Delay Entre 100 Pacotes de 30 bytes')
+    plt.xlabel('Delay(us)')
+    plt.ylabel('Tempo da Captura de Python(s)')
+    fig.savefig('img/pyCaptTime'+name+'.png')
+    plt.show()
+
+def saveToFile(nameFile, y):
+    np.save(nameFile+name+'array.npy', y)    # .npy extension is added if not given
+    print("File Saved")
+
+def loadFromFile(nameFile):
+    d = np.load(nameFile+name+'array.npy')
+    return d
 
 def connect(mac, add_type):
     print(f"Connecting to: {mac}, address type: {add_type}")
@@ -76,55 +112,63 @@ def findCharacteristics(uuids, service):
     return characteristics
 
 if __name__ == "__main__":
+    acerto = np.zeros((100,1))
+    tempDec = np.zeros((100,1))
+    
+    
     conn = connect(ESP32_MAC, ADD_TYPE)
     try:        
         svc = findService(SERVICE_UUID, conn)
         chrs = findCharacteristics([CHARACTERISTIC_SEND_UUID ,CHARACTERISTIC_RECEIVE_UUID],svc)
         print(chrs[1].read())
         chrs[0].write(str.encode("start"))
-
         
-        t = time.time()
-        
-        sum = 0
-        lastnum = 0
-        num = 0
-        while(num < 99):
-        #while True:
-            #print(i)
-            aux = chrs[1].read()
-            newAux = bytearray(aux)
-
-            num = int.from_bytes(newAux[7:8], signed = True,byteorder='little')
-            for j in range(30):
-            #j = 7
-                num2 = int.from_bytes(newAux[j:j+1], signed = True,byteorder='little')
-                aux_print = "{0:0=4d}".format(num2)
-                if j == 7:
-                    print("|", end = "")
-                print(aux_print, end = ",")
-                if j == 7:
-                    print("|", end = "")
+        leitAtual = 0
+        while(leitAtual < 100):
+            totalSum = 0
+            lastnum = 0
+            num = 0
+            t = time.time()
+            print("Leitura[",leitAtual,"]")
+            while(num <= 200):
+                aux = chrs[1].read()
+                newAux = bytearray(aux)
+                num = int.from_bytes(newAux[7:8], signed = True,byteorder='little')
+                if num == -56:
+                    # Value to end current package count
+                    aux = chrs[1].read()
+                    break
+                for j in range(30):
+                    num2 = int.from_bytes(newAux[j:j+1], signed = True,byteorder='little')
+                    aux_print = "{0:0=4d}".format(num2)
+                if lastnum!= num:
+                    totalSum += 1     
+                lastnum = num
                 
+            
+            acc = (totalSum)/100
+            # print("Acerto: ", acc)
+            acerto[leitAtual] = acc
+            elapsed_time = time.time() - t
+            tempDec[leitAtual] = elapsed_time
 
-            if lastnum!= num:
-                sum += num             
-            lastnum = num
+            # tempDec = np.insert(tempDec, leitAtual, elapsed_time, axis=1)
+            # print("Tempo decorrido: ", elapsed_time)
             print("\n")
-        error = (sum)/SUM1TO100
-        print("Acerto: ", error)
-        elapsed_time = time.time() - t
-        print(elapsed_time)
-
-            #print("ELAPSED TIME: ", elapsed_time)
-
-            # for ch in svc.getCharacteristics():
-            #     print(f"\t{ch}, hnd={hex(ch.handle)}, supports {ch.propertiesToString()}")
-            #     if (ch.supportsRead()):
-            #         try:
-            #             print("\t->", repr(ch.read()))
-            #         except btle.BTLEException as e:
-            #             print("\t->", e)
+            leitAtual+=1    
+        
+        acerto = np.reshape(acerto, (100, ))
+        tempDec = np.reshape(tempDec, (100, ))
+        # print(acerto)
+        # print("Tempo decorrido: ", tempDec) 
+        delay = np.arange(200000, 200,-1998)
+        # print('Delay ', delay)
+        graphAcc(acerto, delay)
+        graphPyTime(tempDec, delay)
+        print('Loading Files')
+        saveToFile('delay', delay)
+        saveToFile('acerto', acerto)
+        saveToFile('TempoDec', tempDec)
     finally:
         conn.disconnect()
     pass
