@@ -6,41 +6,46 @@ import numpy as np
 name = 'Com_Sensores'
 # name = 'Sem_Sensores'
 
-def graphAcc(y, x, y2=None):
-    # x = np.arange(100)
+def graphAcc(x, y, y2 = None):
     fig = plt.figure()
     ax = plt.subplot(111)
     savefig = ''
     if (y2 is None) :
         ax.plot(x, y, label='$'+name)
-        plt.ylabel('Pacotes Recebidos(%)')
         savefig = 'img/pacotesBLE'+name+'.png'
     else:
-        # ax.plot(x, y, 'r',label='Com_Sensores')
-        # ax.plot(x, y2, 'b',label='Sem_Sensores')
-        plt.ylabel('Pacotes Recebidos(%)')
+        ax.plot(x, y, 'r',label='Com_Sensores')
+        ax.plot(x, y2, 'b',label='Sem_Sensores')
         savefig = 'img/pacotesBLE.png'
+
+    plt.ylabel('Pacotes Recebidos(%)')
     plt.title('Pacotes Recebidos x Delay Entre 100 Pacotes de 30 bytes')
     plt.xlabel('Delay(us)')
 
     plt.legend()
     fig.savefig(savefig)
+    # plt.show()
 
-
-    plt.show()
-
-def graphPyTime(y, x, y2=None):
-    # x = np.arange(100)
+def graphPyTime(x, y, y2=None):
     fig = plt.figure()
     ax = plt.subplot(111)
-    ax.plot(x, y, label='$'+name)
+    savefig = ''
+       
+    if (y2 is None) :
+        ax.plot(x, y, label='$'+name)
+        savefig = 'img/pyCaptTime'+name+'.png'
+    else:
+        ax.plot(x, y, 'r',label='Com_Sensores')
+        ax.plot(x, y2, 'b',label='Sem_Sensores')
+        savefig = 'img/pyCaptTime.png'
 
     plt.title('Tempo Decorrido de Captura x Delay Entre 100 Pacotes de 30 bytes')
     plt.xlabel('Delay(us)')
     plt.ylabel('Tempo da Captura de Python(s)')
-    fig.savefig('img/pyCaptTime'+name+'.png')
+    
+    plt.legend()
+    fig.savefig(savefig)
     plt.show()
-
 
 def saveToFile(nameFile, y):
     np.save('data/'+nameFile+name+'array.npy', y)    # .npy extension is added if not given
@@ -69,5 +74,5 @@ if __name__ == "__main__":
     tempDecSS = loadFromFile('TempoDec')
 
     # graphAcc(acerto, delay, acertoSS)
-    graphAcc(acerto, delay)
-    # graphPyTime(tempDec, delay)
+    graphAcc(delay, acerto,  acertoSS)
+    graphPyTime(delay, tempDec, tempDecSS)
