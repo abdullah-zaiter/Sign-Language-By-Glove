@@ -116,8 +116,6 @@ asio/asio/src/asio.o: \
  /home/skira/esp/esp-idf/components/lwip/lwip/src/include/../../../lwip/src/include/lwip/inet.h \
  /home/skira/esp/esp-idf/components/newlib/platform_include/net/if.h \
  /home/skira/esp/esp-idf/components/asio/port/include/esp_exception.h \
- /home/skira/esp/esp-idf/components/log/include/esp_log.h \
- /home/skira/esp/esp-idf/components/log/include/esp_log_internal.h \
  /home/skira/esp/esp-idf/components/asio/asio/asio/include/asio/impl/execution_context.ipp \
  /home/skira/esp/esp-idf/components/asio/asio/asio/include/asio/execution_context.hpp \
  /home/skira/esp/esp-idf/components/asio/asio/asio/include/asio/detail/noncopyable.hpp \
@@ -552,10 +550,6 @@ asio/asio/src/asio.o: \
 /home/skira/esp/esp-idf/components/newlib/platform_include/net/if.h:
 
 /home/skira/esp/esp-idf/components/asio/port/include/esp_exception.h:
-
-/home/skira/esp/esp-idf/components/log/include/esp_log.h:
-
-/home/skira/esp/esp-idf/components/log/include/esp_log_internal.h:
 
 /home/skira/esp/esp-idf/components/asio/asio/asio/include/asio/impl/execution_context.ipp:
 

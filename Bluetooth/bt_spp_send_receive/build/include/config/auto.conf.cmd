@@ -2,8 +2,10 @@ deps_config := \
 	/home/skira/esp/esp-idf/components/app_trace/Kconfig \
 	/home/skira/esp/esp-idf/components/aws_iot/Kconfig \
 	/home/skira/esp/esp-idf/components/bt/Kconfig \
+	/home/skira/Documents/Github/Sign-Language-By-Glove/Bluetooth/bt_spp_send_receive/components/cpp_utils/Kconfig \
 	/home/skira/esp/esp-idf/components/driver/Kconfig \
 	/home/skira/esp/esp-idf/components/esp32/Kconfig \
+	/home/skira/Documents/Github/Sign-Language-By-Glove/Bluetooth/bt_spp_send_receive/components/esp32-MPU-driver/Kconfig \
 	/home/skira/esp/esp-idf/components/esp_adc_cal/Kconfig \
 	/home/skira/esp/esp-idf/components/esp_event/Kconfig \
 	/home/skira/esp/esp-idf/components/esp_http_client/Kconfig \
@@ -28,6 +30,7 @@ deps_config := \
 	/home/skira/esp/esp-idf/components/vfs/Kconfig \
 	/home/skira/esp/esp-idf/components/wear_levelling/Kconfig \
 	/home/skira/esp/esp-idf/components/bootloader/Kconfig.projbuild \
+	/home/skira/Documents/Github/Sign-Language-By-Glove/Bluetooth/bt_spp_send_receive/components/esp32-MPU-driver/Kconfig.projbuild \
 	/home/skira/esp/esp-idf/components/esptool_py/Kconfig.projbuild \
 	/home/skira/esp/esp-idf/components/partition_table/Kconfig.projbuild \
 	/home/skira/esp/esp-idf/Kconfig
