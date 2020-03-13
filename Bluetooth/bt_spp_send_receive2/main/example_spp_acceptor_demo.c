@@ -31,6 +31,12 @@
 #define SPP_SHOW_SPEED 1
 #define SPP_SHOW_MODE SPP_SHOW_DATA    /*Choose show mode: show data or speed*/
 
+
+#define SPP_DATA_LEN 30
+static uint8_t spp_data[SPP_DATA_LEN];
+
+void sendData(esp_spp_cb_param_t *);
+
 static const esp_spp_mode_t esp_spp_mode = ESP_SPP_MODE_CB;
 
 static struct timeval time_new, time_old;
@@ -103,13 +109,51 @@ static void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param)
         break;
     case ESP_SPP_WRITE_EVT:
         ESP_LOGI(SPP_TAG, "ESP_SPP_WRITE_EVT");
+        sendData(param);
         break;
     case ESP_SPP_SRV_OPEN_EVT:
         ESP_LOGI(SPP_TAG, "ESP_SPP_SRV_OPEN_EVT");
+        sendData(param);
         gettimeofday(&time_old, NULL);
         break;
     default:
         break;
+    }
+}
+
+void sendData(esp_spp_cb_param_t *param)
+{
+    bool bWrite = true;
+    ESP_LOGI(SPP_TAG, "ESP_SPP_WRITING");
+       
+    ESP_LOGI(SPP_TAG, "bWrite: %d: ", bWrite);
+    //Added code from Initiator - Start
+    if (bWrite){
+        ESP_LOGI(SPP_TAG, "bWrite = true");
+        ESP_LOGI(SPP_TAG, "Call esp_spp_write(param->srv_open.handle, SPP_DATA_LEN, spp_data)");
+
+        //esp_err_tesp_spp_write(uint32_t handle, int len, uint8_t *p_data)
+        esp_spp_write(param->srv_open.handle, SPP_DATA_LEN, spp_data);
+
+        //Test 1
+        //uint8_t myData[10];
+
+        //Test 2
+        char * c = "Hello";
+        // "Hello" is in fact just { 'H', 'e', 'l', 'l', 'o', '\0' }
+        uint8_t * u = (uint8_t *)c;
+        //uint8_t x = u[1];
+        // x is 101, which is the ASCII char code of 'e'
+
+        esp_spp_write(param->srv_open.handle, 6, u);
+
+        //Test, compiles ok
+        int intTest = 6;
+        intTest = 2 + 4;
+        esp_spp_write(param->srv_open.handle, intTest, u);        
+    }
+    else{
+        ESP_LOGI(SPP_TAG, "bWriteAfterOpenEvt = false");
     }
 }
 
