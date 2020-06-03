@@ -10,3 +10,6 @@ EXTRA_COMPONENT_DIRS += $(abspath ./components/esp32-MPU-driver)
 EXTRA_COMPONENT_DIRS += ${HOME}/esp/libraries/I2Cbus
 
 include $(IDF_PATH)/make/project.mk
+
+
+CPPFLAGS += -DI2CBUS_COMPONENT_TRUE=1
