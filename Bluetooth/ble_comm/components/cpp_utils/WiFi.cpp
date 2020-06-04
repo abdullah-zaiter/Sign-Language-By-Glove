@@ -218,8 +218,12 @@ void WiFi::dump() {
 	ESP_LOGD(LOG_TAG, "WiFi Dump");
 	ESP_LOGD(LOG_TAG, "---------");
 	char ipAddrStr[30];
-	ip_addr_t ip = ::dns_getserver(0);
-	inet_ntop(AF_INET, &ip, ipAddrStr, sizeof(ipAddrStr));
+
+	// ip_addr_t ip = ::dns_getserver(0);
+	// inet_ntop(AF_INET, &ip, ipAddrStr, sizeof(ipAddrStr));
+
+	inet_ntop(AF_INET, (::dns_getserver(0)), ipAddrStr, sizeof(ipAddrStr));
+
 	ESP_LOGD(LOG_TAG, "DNS Server[0]: %s", ipAddrStr);
 } // dump
 
