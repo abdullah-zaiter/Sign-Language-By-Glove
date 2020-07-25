@@ -1,5 +1,3 @@
-#include "mpu/types.hpp"
-
 #define SENSORS_QUANTITY 5
 #define AXIS_QUANTITY 3
 #define X 0

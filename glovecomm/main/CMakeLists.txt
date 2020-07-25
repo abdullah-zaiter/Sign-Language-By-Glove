@@ -1,2 +1,2 @@
-idf_component_register(SRCS "imu_read_test.cpp"
+idf_component_register(SRCS "glovecomm.cpp"
                     INCLUDE_DIRS "../include")
