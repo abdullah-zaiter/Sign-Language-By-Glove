@@ -10,3 +10,10 @@ sudo apt install glib2.0-dev
 ```
 * Use the environment.yml (import it using conda) file to run all python codes, and code flasher to esp.  
 
+* Dont forget to init and update git submodules before starting
+```
+git submodule init
+```
+```
+git submodule update
+```
