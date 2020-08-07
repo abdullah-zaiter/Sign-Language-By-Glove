@@ -1,6 +1,6 @@
 #include "esp_spiffs.h"
 #include <string.h>
-#define BUFFER_SIZE 500
+#define BUFFER_SIZE 4671
 
 void initStorage(void){
     ESP_LOGI(TAG, "Initializing SPIFFS");
@@ -34,15 +34,18 @@ void initStorage(void){
     }
 }
 
-void fillSensorDataStructure(ImuReading* readings) {
+void fillSensorDataStructure(HandReading* readings) {
     for (uint16_t i = 0; i < BUFFER_SIZE; i++)
     {
-        readings[i].imu.accel[X] = (__int8_t) esp_random();
-        readings[i].imu.accel[Y] = (__int8_t) esp_random();
-        readings[i].imu.accel[Z] = (__int8_t) esp_random();
-        readings[i].imu.gyro[X] = (__int8_t) esp_random();
-        readings[i].imu.gyro[Y] = (__int8_t) esp_random();
-        readings[i].imu.gyro[Z] = (__int8_t) esp_random();
+        for (uint16_t j = 0; j < SENSORS_QUANTITY; j++)
+        {
+            readings[i].imu[j].accel[X] = (__int8_t) esp_random();
+            readings[i].imu[j].accel[Y] = (__int8_t) esp_random();
+            readings[i].imu[j].accel[Z] = (__int8_t) esp_random();
+            readings[i].imu[j].gyro[X] = (__int8_t) esp_random();
+            readings[i].imu[j].gyro[Y] = (__int8_t) esp_random();
+            readings[i].imu[j].gyro[Z] = (__int8_t) esp_random();
+        }
         readings[i].timestamp = esp_random();
     }
 }
