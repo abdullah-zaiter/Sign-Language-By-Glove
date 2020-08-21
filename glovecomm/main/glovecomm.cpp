@@ -38,7 +38,7 @@ FILE* open_file(const char * filePrefix){
 void writeToFile(HandReading* readings, const char* filename){
     FILE* f = open_file(filename);
     fwrite(readings, sizeof(HandReading), BUFFER_SIZE, f);
-    ESP_LOGI(TAG, "File written, closing file %s", filename);
+    ESP_LOGI(TAG, "File written, closing file");
     fclose(f);
 }
 
@@ -83,17 +83,16 @@ void runSpiffs(void) {
     {
         std::string filenameString = std::string(std::string("") + "/spiffs/sensordata" + std::to_string(i) + ".bin");
         const char * filename = filenameString.c_str();
-        ESP_LOGI(TAG, "Reopening file %s", filename);
+        ESP_LOGI(TAG, "Reopening and reading file %s", filename);
         FILE* f = fopen(filename, "rb");
         if (f == NULL) {
             ESP_LOGE(TAG, "Failed to open file for reading");
             return;
         }
-        ESP_LOGI(TAG, "Reading file");
         fread(data, sizeof(HandReading), BUFFER_SIZE, f);
         fclose(f);
         ESP_LOGI(TAG, "Test:\n\t\t\t    data[%d].timestamp = %ud", 2, data[2].timestamp);
-        memset(data, 0, sizeof(HandReading)*BUFFER_SIZE);
+        memset(data, 0, sizeof(data));
     }
     
     
