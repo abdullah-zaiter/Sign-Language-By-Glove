@@ -1,6 +1,7 @@
 #include "esp_spiffs.h"
-#include <string.h>
-#define BUFFER_SIZE 4671
+#define BUFFER_SIZE 4669
+
+uint fileCount = 1;
 
 void initStorage(void){
     ESP_LOGI(TAG, "Initializing SPIFFS");
