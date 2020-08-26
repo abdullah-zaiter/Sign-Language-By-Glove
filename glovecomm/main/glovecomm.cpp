@@ -23,18 +23,18 @@ static const char *TAG = "glovecomm";
 FILE* open_file(const char* filename, const char* mode){
     ESP_LOGI(TAG, "Opening file %s", filename);
     FILE* f = fopen(filename, mode);
-    if (f == NULL) {
+    if (f == NULL)
         ESP_LOGE(TAG, "Failed to open file for writing");
-    }
     return f;
 }
 
 void writeToFile(FILE* f, HandReading* readings){
     int written = fwrite(readings, sizeof(HandReading), BUFFER_SIZE, f);
-    if (written != BUFFER_SIZE) {
+    if (written != BUFFER_SIZE)
         ESP_LOGE(TAG, "Error writing data, written= %d, BUFFER_SIZE=%d", written, BUFFER_SIZE);
-    }
-    ESP_LOGI(TAG, "File written, closing file");
+    else
+        ESP_LOGI(TAG, "File written, closing file");
+    
     fclose(f);
     f = NULL;
 }
