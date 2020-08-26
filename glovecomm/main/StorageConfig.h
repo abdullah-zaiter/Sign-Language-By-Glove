@@ -11,7 +11,7 @@ void initStorage(void){
     .max_files = 1,
     .format_if_mount_failed = true
     };
-
+    esp_spiffs_format(NULL);
     esp_err_t ret = esp_vfs_spiffs_register(&conf);
 
     if (ret != ESP_OK) {
