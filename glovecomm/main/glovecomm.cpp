@@ -19,7 +19,9 @@ static const char *TAG = "glovecomm";
 #include "SensorDataType.h"
 #include "StorageConfig.h"
 #include "SensorsConfig.h"
-#include "gatts_server.h"
+#include "GattsServer.h"
+
+FILE* globalF;
 
 
 FILE* open_file(const char* filename, const char* mode){
@@ -67,18 +69,12 @@ static void run(MPU_t* MPU) {
 
 }
 
-void printFileSize(FILE* f) {
-    fseek(f, 0L, SEEK_END);
-    int size = ftell(f);
-    ESP_LOGI(TAG, "FILE SIZE = %d", size);
-    fseek(f, 0L, SEEK_SET);
-}
-
 void runSpiffs(void) {
 
     static HandReading data[BUFFER_SIZE];
     
     FILE* f = open_file("/spiffs/sensordata.bin", "wb");
+    
     printFileSize(f);
     fillSensorDataStructure(data);
     ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
@@ -96,7 +92,7 @@ void runSpiffs(void) {
     writeToFile(f, data);
     
     memset(data, 0, sizeof(data));
-
+    
 
     ESP_LOGI(TAG, "Reopening file");
     f = fopen("/spiffs/sensordata.bin", "rb");
@@ -109,6 +105,9 @@ void runSpiffs(void) {
         return;
     }
     
+
+    // globalF = f;
+
     ESP_LOGI(TAG, "Reading file");
     
     fread(data, sizeof(HandReading), BUFFER_SIZE, f);
@@ -124,10 +123,10 @@ void runSpiffs(void) {
     
     
     fclose(f);    
-    f = NULL;
+    // f = NULL;
     
-    esp_vfs_spiffs_unregister(NULL);
-    ESP_LOGI(TAG, "SPIFFS unmounted");
+    // esp_vfs_spiffs_unregister(NULL);
+    // ESP_LOGI(TAG, "SPIFFS unmounted");
 }
 
 extern "C" void app_main()
@@ -139,6 +138,6 @@ extern "C" void app_main()
     //     cnt++;
     // }
     initStorage();
-    // runSpiffs();
+    runSpiffs();
     init_gatts_server();
 }

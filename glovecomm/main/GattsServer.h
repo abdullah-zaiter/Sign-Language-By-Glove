@@ -15,6 +15,7 @@
 *
 ****************************************************************************/
 
+#include <iostream>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +33,7 @@
 #include "esp_bt_defs.h"
 #include "esp_bt_main.h"
 #include "esp_gatt_common_api.h"
+
 
 #include "sdkconfig.h"
 
@@ -51,12 +53,18 @@ static void gatts_profile_b_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
 #define GATTS_DESCR_UUID_TEST_B     0x2222
 #define GATTS_NUM_HANDLE_TEST_B     4
 
-#define TEST_DEVICE_NAME            "ESP_GATTS_DEMO"
+#define TEST_DEVICE_NAME            "GLOVE_ESP"
 #define TEST_MANUFACTURER_DATA_LEN  17
 
 #define GATTS_DEMO_CHAR_VAL_LEN_MAX 0x40
 
 #define PREPARE_BUF_MAX_SIZE 1024
+
+
+
+
+
+
 
 static uint8_t char1_str[] = {0x11,0x22,0x33};
 static esp_gatt_char_prop_t a_property = 0;
@@ -92,21 +100,6 @@ static uint8_t adv_service_uuid128[32] = {
     0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
 };
 
-// uint8_t *adv_service_uuid128;
-
-void setupGlobal() {
-    // adv_service_uuid128 = (uint8_t *) malloc(sizeof(uint8_t)*32);
-    // uint8_t val_adv_service_uuid128[32]  = {
-    //     /* LSB <--------------------------------------------------------------------------------> MSB */
-    //     //first uuid, 16bit, [12],[13] is the value
-    //     0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xEE, 0x00, 0x00, 0x00,
-    //     //second uuid, 32bit, [12], [13], [14], [15] is the value
-    //     0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
-    // };
-    // adv_service_uuid128 = val_adv_service_uuid128;
-
-
-}
 
 // The length of adv data must be less than 31 bytes
 //static uint8_t test_manufacturer[TEST_MANUFACTURER_DATA_LEN] =  {0x12, 0x23, 0x45, 0x56};
@@ -361,10 +354,10 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
         rsp.attr_value.handle = param->read.handle;
         rsp.attr_value.len = 4;
-        rsp.attr_value.value[0] = 0xde;
-        rsp.attr_value.value[1] = 0xed;
-        rsp.attr_value.value[2] = 0xbe;
-        rsp.attr_value.value[3] = 0xef;
+        rsp.attr_value.value[0] = 0xFF;
+        rsp.attr_value.value[1] = 0xFF;
+        rsp.attr_value.value[2] = 0xaa;
+        rsp.attr_value.value[3] = 0xdd;
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
                                     ESP_GATT_OK, &rsp);
     }
@@ -532,13 +525,115 @@ static void gatts_profile_b_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         esp_gatt_rsp_t rsp;
         memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
         rsp.attr_value.handle = param->read.handle;
-        rsp.attr_value.len = 4;
-        rsp.attr_value.value[0] = 0xde;
-        rsp.attr_value.value[1] = 0xed;
-        rsp.attr_value.value[2] = 0xbe;
-        rsp.attr_value.value[3] = 0xef;
+        
+        
+        // static HandReading * data;
+        static HandReading data[1];
+
+        FILE* f = fopen("/spiffs/sensordata.bin", "rb");
+        // int ret = readFromFile(fileToWrite);
+        ESP_LOGI(TAG, "DATA SIZE = %d", sizeof(data));
+        printFileSize(f);
+
+        if (f == NULL) {
+            ESP_LOGE(TAG, "Failed to open file for reading");
+            return;
+        }
+
+        ESP_LOGI(TAG, "Opened successfully");
+
+        fread(data, sizeof(HandReading), 1, f);
+
+
+        ESP_LOGE(TAG, "Got HandReadings from File");
+
+        // rsp.attr_value.len = BUFFER_SIZE;
+        rsp.attr_value.len = 37;
+
+        uint8_t *dataPointer;
+        uint8_t dataPkg[34];
+
+        dataPointer = getBytesDataPackage(data, dataPkg);
+
+        ESP_LOGI(TAG, "Got Bytes");
+
+        // ESP_LOGE(TAG, "DataPkg 0 = [%d]", dataPointer[0] );
+        // ESP_LOGE(TAG, "DataPkg 1 = [%d]", dataPointer[1] );
+        // ESP_LOGE(TAG, "DataPkg 2 = [%d]", dataPointer[2] );
+        // ESP_LOGE(TAG, "DataPkg 3 = [%d]", dataPointer[3] );
+        // ESP_LOGE(TAG, "DataPkg 4 = [%d]", dataPointer[4] );
+
+        // &(rsp.attr_value.value) = &(dataPointer);
+
+        // ESP_LOGE(TAG, "DataPkg %d = [%d]", 0, rsp.attr_value.value[0] );
+        // ESP_LOGE(TAG, "DataPkg %d = [%d]", 1, rsp.attr_value.value[1] );
+        // ESP_LOGE(TAG, "DataPkg %d = [%d]", 2, rsp.attr_value.value[2] );
+        // ESP_LOGE(TAG, "DataPkg %d = [%d]", 3, rsp.attr_value.value[3] );
+        // ESP_LOGE(TAG, "DataPkg %d = [%d]", 4, rsp.attr_value.value[4] );
+
+        
+        for(int i = 0; i < 34; i=i+1) {
+            ESP_LOGE(TAG, "DataPkg %d = [%d]", i, dataPointer[i] );
+            rsp.attr_value.value[i] = dataPointer[i];
+        }
+        rsp.attr_value.value[34] = 0;
+        rsp.attr_value.value[35] = 0;
+        rsp.attr_value.value[36] = 0;
+        rsp.attr_value.value[37] = 0;
+
+
+        ESP_LOGI(TAG, "Got rsp");
+        memset(data, 0, sizeof(data));
+        fclose(f);    
+        // f = NULL;
+        // esp_vfs_spiffs_unregister(NULL);    
+
+        ESP_LOGI(TAG, "Closed all");
+
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
                                     ESP_GATT_OK, &rsp);
+
+        // 34bytes ao todo
+        // 4bytes -> uint8 -> timestamp
+        // Sensor 1 -> 6 bytes
+            // 1byte -> int8 -> acceleração X
+            // 1byte -> int8 -> acceleração Y
+            // 1byte -> int8 -> acceleração Z
+            // 1byte -> int8 -> gyroscopio X
+            // 1byte -> int8 -> gyroscopio Y
+            // 1byte -> int8 -> gyroscopio Z
+
+        // Sensor 2 -> 6 bytes
+            // 1byte -> int8 -> acceleração X
+            // 1byte -> int8 -> acceleração Y
+            // 1byte -> int8 -> acceleração Z
+            // 1byte -> int8 -> gyroscopio X
+            // 1byte -> int8 -> gyroscopio Y
+            // 1byte -> int8 -> gyroscopio Z
+
+        // Sensor 3 -> 6 bytes
+            // 1byte -> int8 -> acceleração X
+            // 1byte -> int8 -> acceleração Y
+            // 1byte -> int8 -> acceleração Z
+            // 1byte -> int8 -> gyroscopio X
+            // 1byte -> int8 -> gyroscopio Y
+            // 1byte -> int8 -> gyroscopio Z
+
+        // Sensor 4 -> 6 bytes
+            // 1byte -> int8 -> acceleração X
+            // 1byte -> int8 -> acceleração Y
+            // 1byte -> int8 -> acceleração Z
+            // 1byte -> int8 -> gyroscopio X
+            // 1byte -> int8 -> gyroscopio Y
+            // 1byte -> int8 -> gyroscopio Z
+
+        // Sensor 5 -> 6 bytes
+            // 1byte -> int8 -> acceleração X
+            // 1byte -> int8 -> acceleração Y
+            // 1byte -> int8 -> acceleração Z
+            // 1byte -> int8 -> gyroscopio X
+            // 1byte -> int8 -> gyroscopio Y
+            // 1byte -> int8 -> gyroscopio Z
         break;
     }
     case ESP_GATTS_WRITE_EVT: {
@@ -691,7 +786,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
 
 void init_gatts_server()
 {
-    setupGlobal();
+    
     esp_err_t ret;
 
     // Initialize NVS.
