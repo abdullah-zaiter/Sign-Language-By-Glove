@@ -21,7 +21,6 @@ static const char *TAG = "glovecomm";
 #include "SensorsConfig.h"
 #include "GattsServer.h"
 
-FILE* globalF;
 
 
 FILE* open_file(const char* filename, const char* mode){
@@ -77,56 +76,57 @@ void runSpiffs(void) {
     
     printFileSize(f);
     fillSensorDataStructure(data);
-    ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
+    // ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
     writeToFile(f, data);
 
     f = open_file("/spiffs/sensordata.bin", "ab");
     printFileSize(f);
     fillSensorDataStructure(data);
-    ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
+    // ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
     writeToFile(f, data);
 
     f = open_file("/spiffs/sensordata.bin", "ab");
     fillSensorDataStructure(data);
-    ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
+    // ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
     writeToFile(f, data);
     
     memset(data, 0, sizeof(data));
     
 
-    ESP_LOGI(TAG, "Reopening file");
-    f = fopen("/spiffs/sensordata.bin", "rb");
+    // ESP_LOGI(TAG, "Reopening file");
+    // f = fopen("/spiffs/sensordata.bin", "rb");
    
-    ESP_LOGI(TAG, "DATA SIZE = %d", sizeof(data));
-    printFileSize(f);
+    // ESP_LOGI(TAG, "DATA SIZE = %d", sizeof(data));
+    // printFileSize(f);
     
-    if (f == NULL) {
-        ESP_LOGE(TAG, "Failed to open file for reading");
-        return;
-    }
+    // if (f == NULL) {
+    //     ESP_LOGE(TAG, "Failed to open file for reading");
+    //     return;
+    // }
     
 
-    // globalF = f;
-
-    ESP_LOGI(TAG, "Reading file");
+    // ESP_LOGI(TAG, "Reading file");
     
-    fread(data, sizeof(HandReading), BUFFER_SIZE, f);
-    ESP_LOGI(TAG, "Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
+    // fread(data, sizeof(HandReading), BUFFER_SIZE, f);
+    // ESP_LOGI(TAG, "Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
     
-    memset(data, 0, sizeof(data));
-    fread(data, sizeof(HandReading), BUFFER_SIZE, f);
-    ESP_LOGI(TAG, "Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
+    // memset(data, 0, sizeof(data));
+    // fread(data, sizeof(HandReading), BUFFER_SIZE, f);
+    // ESP_LOGI(TAG, "Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
     
-    memset(data, 0, sizeof(data));
-    fread(data, sizeof(HandReading), BUFFER_SIZE, f);
-    ESP_LOGI(TAG, "Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
+    // memset(data, 0, sizeof(data));
+    // fread(data, sizeof(HandReading), BUFFER_SIZE, f);
+    // ESP_LOGI(TAG, "Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
     
     
     fclose(f);    
     // f = NULL;
     
     // esp_vfs_spiffs_unregister(NULL);
-    // ESP_LOGI(TAG, "SPIFFS unmounted");
+}
+
+void destroyAllFiles() {
+    esp_vfs_spiffs_unregister(NULL);
 }
 
 extern "C" void app_main()
@@ -140,4 +140,5 @@ extern "C" void app_main()
     initStorage();
     runSpiffs();
     init_gatts_server();
+    // destroyAllFiles();
 }

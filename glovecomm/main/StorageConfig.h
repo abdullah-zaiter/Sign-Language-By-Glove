@@ -46,48 +46,24 @@ void initStorage(void){
 void fillSensorDataStructure(HandReading* readings) {
     for (uint16_t i = 0; i < BUFFER_SIZE; i++)
     {
-        readings[i].timestamp = esp_random();
+        // readings[i].timestamp = esp_random();
+        readings[i].timestamp = (__uint32_t) 0;
+
         for (uint16_t j = 0; j < SENSORS_QUANTITY; j++)
         {
-            readings[i].imu[j].accel[X] = (__int8_t) esp_random();
-            readings[i].imu[j].accel[Y] = (__int8_t) esp_random();
+            readings[i].imu[j].accel[X] = (__int8_t) 22;
+            readings[i].imu[j].accel[Y] = (__int8_t) 22;
             readings[i].imu[j].accel[Z] = (__int8_t) esp_random();
             readings[i].imu[j].gyro[X] = (__int8_t) esp_random();
-            readings[i].imu[j].gyro[Y] = (__int8_t) esp_random();
-            readings[i].imu[j].gyro[Z] = (__int8_t) esp_random();
+            readings[i].imu[j].gyro[Y] = (__int8_t) 1;
+            readings[i].imu[j].gyro[Z] = (__int8_t) 1;
         }
     }
+    ESP_LOGI(TAG, "DATA readings[%d].timestamp = %d", 0,readings[0].timestamp>>2 );
+    ESP_LOGI(TAG, "DATA readings[%d].timestamp = %d", 0,readings[0].timestamp>>4 );
+    ESP_LOGI(TAG, "DATA readings[%d].timestamp = %d", 0,readings[0].timestamp>>6 );
+    ESP_LOGI(TAG, "DATA readings[%d].timestamp = %d", 0,readings[0].timestamp>>8 );
+
 }
 
 
-uint8_t * getBytesDataPackage(HandReading* readings, uint8_t * dataPkg) {
-    ESP_LOGI(TAG, "Starting Data Pkg ");
-    for (uint16_t i = 0; i < 1; i++)
-    {
-        dataPkg[i] = (__uint8_t) (readings[i].timestamp) >> 24;
-        dataPkg[i+1] = (__uint8_t) (readings[i].timestamp >> 16);
-        dataPkg[i+2] = (__uint8_t) (readings[i].timestamp >> 8) ;
-        dataPkg[i+3] = (__uint8_t) (readings[i].timestamp >> 0) ;
-
-        ESP_LOGI(TAG, "Finish timestamp ");
-
-        for (uint16_t j = 0; j < SENSORS_QUANTITY; j++)
-        {
-            dataPkg[i+j+4] = readings[i].imu[j].accel[X];
-            dataPkg[i+j+5] = readings[i].imu[j].accel[Y];
-            dataPkg[i+j+6] = readings[i].imu[j].accel[Z];
-            dataPkg[i+j+7] = readings[i].imu[j].gyro[X];
-            dataPkg[i+j+8] = readings[i].imu[j].gyro[Y];
-            dataPkg[i+j+9] = readings[i].imu[j].gyro[Z];
-        }
-    }
-
-
-    ESP_LOGI(TAG, "Created Data Pkg %d", dataPkg[0]);
-    ESP_LOGI(TAG, "Created Data Pkg %d", dataPkg[1]);
-    ESP_LOGI(TAG, "Created Data Pkg %d", dataPkg[2]);
-    ESP_LOGI(TAG, "Created Data Pkg %d", dataPkg[3]);
-    ESP_LOGI(TAG, "Created Data Pkg %d", dataPkg[4]);
-
-    return dataPkg;
-}
