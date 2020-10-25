@@ -527,33 +527,43 @@ static void gatts_profile_b_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         break;
     case ESP_GATTS_READ_EVT: {
         ESP_LOGI(GATTS_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
+        
         esp_gatt_rsp_t rsp;
         memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
         rsp.attr_value.handle = param->read.handle;
-        
-        static uint8_t data[600];
 
-        // 600 /34 = 17.64...
-        // 600 /22 = 27.27...
+
+        static uint8_t data[594];
 
         fread(data, 22, 1, globalF);
         ESP_LOGE(TAG, "Got HandReadings from File");
 
-        ESP_LOGI(TAG, "DATA2 SIZE = %d", sizeof(data));
-
-
         rsp.attr_value.len = 22;        
         memcpy(rsp.attr_value.value, data, 22);
+
+        ESP_LOGE(TAG, "data size %d", sizeof(rsp.attr_value.value) );
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id, ESP_GATT_OK, &rsp);
 
         memset(data, 0, sizeof(data));
 
         int8_t fileStatus = checkMoreInside(globalF);
         if(fileStatus == FILE_ENDED) {
-
             ESP_LOGI(TAG, "Closing File"); 
             closePackage(globalF);
         }
+
+
+        // uint8_t notify_data[22];
+        // fread(notify_data, 22, 1, globalF);
+        // // for (int i = 0; i < sizeof(notify_data); ++i)
+        // // {
+        // //     notify_data[i] = i%0xff;
+        // // }
+        // //the size of notify_data[] need less than MTU size
+        // esp_ble_gatts_send_indicate(gatts_if, param->write.conn_id, gl_profile_tab[PROFILE_B_APP_ID].char_handle,
+        //                         sizeof(notify_data), notify_data, false);
+
+
 
         // f = NULL;
         // esp_vfs_spiffs_unregister(NULL);    
@@ -783,7 +793,7 @@ FILE* openPackage() {
 void closePackage(FILE* f) {
     fclose(f);          
     f = NULL;
-    // esp_vfs_spiffs_unregister(NULL);    
+    esp_vfs_spiffs_unregister(NULL);    
 }
 
 
@@ -792,6 +802,7 @@ int8_t checkMoreInside(FILE* f) {
     // fseek (f , 0 , SEEK_END);
     // long lSize = ftell (f);
     // rewind (f);
+    printFileSize(f);
     return FILE_EXISTS;
 }
 

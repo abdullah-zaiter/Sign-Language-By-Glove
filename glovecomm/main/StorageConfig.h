@@ -47,7 +47,7 @@ void fillSensorDataStructure(HandReading* readings) {
     for (uint16_t i = 0; i < BUFFER_SIZE; i++)
     {
         // readings[i].timestamp = esp_random();
-        readings[i].timestamp = (__uint32_t) 0;
+        readings[i].timestamp = (__uint32_t) i;
 
         for (uint16_t j = 0; j < SENSORS_QUANTITY; j++)
         {
@@ -59,11 +59,6 @@ void fillSensorDataStructure(HandReading* readings) {
             readings[i].imu[j].gyro[Z] = (__int8_t) 1;
         }
     }
-    ESP_LOGI(TAG, "DATA readings[%d].timestamp = %d", 0,readings[0].timestamp>>2 );
-    ESP_LOGI(TAG, "DATA readings[%d].timestamp = %d", 0,readings[0].timestamp>>4 );
-    ESP_LOGI(TAG, "DATA readings[%d].timestamp = %d", 0,readings[0].timestamp>>6 );
-    ESP_LOGI(TAG, "DATA readings[%d].timestamp = %d", 0,readings[0].timestamp>>8 );
-
 }
 
 
