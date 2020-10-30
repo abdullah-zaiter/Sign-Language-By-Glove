@@ -10,6 +10,8 @@
 static const char *TAG = "glovecomm";
 
 #include <stdio.h>
+#include <string>
+#include <string.h>
 #include "esp_log.h"
 #include "esp_err.h"
 #include "freertos/FreeRTOS.h"
@@ -21,13 +23,16 @@ static const char *TAG = "glovecomm";
 #include "SensorsConfig.h"
 #include "GattsServer.h"
 
-
-
-FILE* open_file(const char* filename, const char* mode){
+FILE* open_file(const char * filePrefix){
+    std::string filenameString = std::string(std::string("") + filePrefix + std::to_string(fileCount) + ".bin");
+    const char * filename = filenameString.c_str();
     ESP_LOGI(TAG, "Opening file %s", filename);
     FILE* f = fopen(filename, mode);
     if (f == NULL)
         ESP_LOGE(TAG, "Failed to open file for writing");
+        fileCount--;
+    }
+    fileCount++;
     return f;
 }
 
@@ -55,8 +60,8 @@ static void run(MPU_t* MPU) {
     for(int j = 0; j < SENSORS_QUANTITY; j++)
     {
         switchGyro(j);
-        MPU->motion(&accelRaw, &gyroRaw);
         if (j==2)   sensors.timestamp = (uint32_t)(esp_timer_get_time());
+        MPU->motion(&accelRaw, &gyroRaw);
         sensors.imu[j].accel[X] = (__int8_t)(accelRaw[X] >> 4);
         sensors.imu[j].accel[Y] = (__int8_t)(accelRaw[Y] >> 4);
         sensors.imu[j].accel[Z] = (__int8_t)(accelRaw[Z] >> 4);
@@ -72,60 +77,30 @@ void runSpiffs(void) {
 
     static HandReading data[BUFFER_SIZE];
     
-    FILE* f = open_file("/spiffs/sensordata.bin", "wb");
+    for (size_t i = 0; i < 3; i++)
+    {
+        fillSensorDataStructure(data);
+        writeToFile(data, "/spiffs/sensordata");
+        ESP_LOGI(TAG, "Test:\n\t\t\t    data[%d].timestamp = %ud", 2, data[2].timestamp);
+    }
     
-    printFileSize(f);
-    fillSensorDataStructure(data);
-    // ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
-    writeToFile(f, data);
-
-    f = open_file("/spiffs/sensordata.bin", "ab");
-    printFileSize(f);
-    fillSensorDataStructure(data);
-    // ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
-    writeToFile(f, data);
-
-    f = open_file("/spiffs/sensordata.bin", "ab");
-    fillSensorDataStructure(data);
-    // ESP_LOGI(TAG, "     Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
-    writeToFile(f, data);
-    
-    memset(data, 0, sizeof(data));
-    
-
-    // ESP_LOGI(TAG, "Reopening file");
-    // f = fopen("/spiffs/sensordata.bin", "rb");
-   
-    // ESP_LOGI(TAG, "DATA SIZE = %d", sizeof(data));
-    // printFileSize(f);
-    
-    // if (f == NULL) {
-    //     ESP_LOGE(TAG, "Failed to open file for reading");
-    //     return;
-    // }
-    
-
-    // ESP_LOGI(TAG, "Reading file");
-    
-    // fread(data, sizeof(HandReading), BUFFER_SIZE, f);
-    // ESP_LOGI(TAG, "Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
-    
-    // memset(data, 0, sizeof(data));
-    // fread(data, sizeof(HandReading), BUFFER_SIZE, f);
-    // ESP_LOGI(TAG, "Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
-    
-    // memset(data, 0, sizeof(data));
-    // fread(data, sizeof(HandReading), BUFFER_SIZE, f);
-    // ESP_LOGI(TAG, "Test:    data[%d].timestamp = %ud", 2, data[2].timestamp);
+    for (size_t i = 1; i < fileCount; i++)
+    {
+        std::string filenameString = std::string(std::string("") + "/spiffs/sensordata" + std::to_string(i) + ".bin");
+        const char * filename = filenameString.c_str();
+        ESP_LOGI(TAG, "Reopening and reading file %s", filename);
+        FILE* f = fopen(filename, "rb");
+        if (f == NULL) {
+            ESP_LOGE(TAG, "Failed to open file for reading");
+            return;
+        }
+        fread(data, sizeof(HandReading), BUFFER_SIZE, f);
+        fclose(f);
+        ESP_LOGI(TAG, "Test:\n\t\t\t    data[%d].timestamp = %ud", 2, data[2].timestamp);
+        memset(data, 0, sizeof(data));
+    }
     
     
-    fclose(f);    
-    // f = NULL;
-    
-    // esp_vfs_spiffs_unregister(NULL);
-}
-
-void destroyAllFiles() {
     esp_vfs_spiffs_unregister(NULL);
 }
 
@@ -137,6 +112,7 @@ extern "C" void app_main()
     //     run(MPU);
     //     cnt++;
     // }
+    
     initStorage();
     runSpiffs();
     init_gatts_server();

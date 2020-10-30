@@ -2,6 +2,8 @@
 #include <string.h>
 #define BUFFER_SIZE 1000//4000
 
+uint fileCount = 1;
+
 uint8_t * getBytesDataPackage(HandReading* , uint8_t * );
 
 void printFileSize(FILE* f) {
