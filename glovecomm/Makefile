@@ -9,8 +9,6 @@ PROJECT_NAME := glovecomm
 EXTRA_COMPONENT_DIRS += $(abspath ./components/MPUdriver)
 EXTRA_COMPONENT_DIRS += $(abspath ./components/MPUdriver/include)
 
-COMPONENT_ADD_INCLUDEDIRS := components/include
-
 #Libs
 EXTRA_COMPONENT_DIRS += $(abspath ./lib)
 

@@ -10,6 +10,6 @@ typedef struct {
 } Imu;
 
 typedef struct {
-    uint32_t timestamp; 
     Imu imu[SENSORS_QUANTITY];
+    uint32_t timestamp; 
 } HandReading;

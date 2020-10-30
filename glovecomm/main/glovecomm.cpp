@@ -21,14 +21,13 @@ static const char *TAG = "glovecomm";
 #include "SensorDataType.h"
 #include "StorageConfig.h"
 #include "SensorsConfig.h"
-#include "GattsServer.h"
 
 FILE* open_file(const char * filePrefix){
     std::string filenameString = std::string(std::string("") + filePrefix + std::to_string(fileCount) + ".bin");
     const char * filename = filenameString.c_str();
     ESP_LOGI(TAG, "Opening file %s", filename);
-    FILE* f = fopen(filename, mode);
-    if (f == NULL)
+    FILE* f = fopen(filename, "wb");
+    if (f == NULL) {
         ESP_LOGE(TAG, "Failed to open file for writing");
         fileCount--;
     }
@@ -36,15 +35,11 @@ FILE* open_file(const char * filePrefix){
     return f;
 }
 
-void writeToFile(FILE* f, HandReading* readings){
-    int written = fwrite(readings, sizeof(HandReading), BUFFER_SIZE, f);
-    if (written != BUFFER_SIZE)
-        ESP_LOGE(TAG, "Error writing data, written= %d, BUFFER_SIZE=%d", written, BUFFER_SIZE);
-    else
-        ESP_LOGI(TAG, "File written, closing file");
-    
+void writeToFile(HandReading* readings, const char* filename){
+    FILE* f = open_file(filename);
+    fwrite(readings, sizeof(HandReading), BUFFER_SIZE, f);
+    ESP_LOGI(TAG, "File written, closing file");
     fclose(f);
-    f = NULL;
 }
 
 MPU_t* init(void) {
@@ -102,6 +97,7 @@ void runSpiffs(void) {
     
     
     esp_vfs_spiffs_unregister(NULL);
+    ESP_LOGI(TAG, "SPIFFS unmounted");
 }
 
 extern "C" void app_main()
@@ -115,6 +111,4 @@ extern "C" void app_main()
     
     initStorage();
     runSpiffs();
-    init_gatts_server();
-    // destroyAllFiles();
 }
