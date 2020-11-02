@@ -58,8 +58,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
 enum State
 {
     FIRST_ITERATION_STATE = 0,
-    SENDING_STATE = 1,
-    LAST_ITERATION_STATE = 2
+    SENDING_STATE = 1
 };
 uint8_t *dataAddress;
 
@@ -412,43 +411,36 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         rsp.attr_value.handle = param->read.handle;
 
         uint32_t totalSize = BUFFER_SIZE * sizeof(HandReading);
-        uint32_t bytesToBeSent = ((totalSize - currentByte) < MAX_MTU) ? (totalSize - currentByte) : (MAX_MTU - 1);
-        rsp.attr_value.len = bytesToBeSent+1;
+        uint32_t bytesToBeSent = ((totalSize+1 - currentByte) <= MAX_MTU) ? (totalSize+1 - currentByte) : (MAX_MTU);
         switch (currentState)
         {
+            
             case FIRST_ITERATION_STATE:
             {
-                ESP_LOGI(TAG,"FIRST_ITERATION_STATE");
-                rsp.attr_value.value[0] = currentState;
-                memcpy(rsp.attr_value.value + 1, data, bytesToBeSent);
+                rsp.attr_value.len = bytesToBeSent;
+                ESP_LOGI(TAG,"FIRST_ITERATION_STATE, TOTAL SIZE= %d", totalSize);
+                rsp.attr_value.value[0] = (uint8_t) std::ceil((totalSize+1.0)/(double)MAX_MTU);
+                memcpy(rsp.attr_value.value + 1, dataAddress, bytesToBeSent-1);
                 currentByte = MAX_MTU - 1;
                 currentState = SENDING_STATE;
                 ESP_LOGI(TAG,"CURRENT BYTE= %d", currentByte);
-
                 break;
             }
             case SENDING_STATE:
             {
-                if (bytesToBeSent > (MAX_MTU - 1))
+                rsp.attr_value.len = bytesToBeSent;
+                ESP_LOGI(TAG,"SENDING_STATE");
+                memcpy(rsp.attr_value.value, &dataAddress[currentByte], bytesToBeSent);
+                currentByte += bytesToBeSent;
+                ESP_LOGI(TAG,"CURRENT BYTE= %d", currentByte);
+                if (currentByte>=totalSize)
                 {
-                    ESP_LOGI(TAG,"SENDING_STATE");
-                    rsp.attr_value.value[0] = currentState;
-                    memcpy(rsp.attr_value.value + 1, data + currentByte, bytesToBeSent);
-                    currentByte += bytesToBeSent;
-                }
-                else if (bytesToBeSent > 0)
-                {
-                    ESP_LOGI(TAG,"LAST_ITERATION_STATE");
-                    currentState = LAST_ITERATION_STATE;
-                    rsp.attr_value.value[0] = currentState;
-                    memcpy(rsp.attr_value.value + 1, data + currentByte, bytesToBeSent);
-                    currentByte = 0;
                     currentState = FIRST_ITERATION_STATE;
+                    currentByte = 0;
                 }
+                
                 break;
             }
-            case LAST_ITERATION_STATE:
-                break;
             default:
                 break;
         }

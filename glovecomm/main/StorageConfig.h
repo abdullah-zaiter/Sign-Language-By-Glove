@@ -1,7 +1,7 @@
 #include "esp_spiffs.h"
 #include "SensorDataType.h"
 
-#define BUFFER_SIZE 50
+#define BUFFER_SIZE 1000
 HandReading data[BUFFER_SIZE];
 uint fileCount = 1;
 
