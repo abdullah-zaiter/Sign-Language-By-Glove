@@ -18,9 +18,9 @@ static const char *TAG = "glovecomm";
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "driver/gpio.h"
-#include "SensorDataType.h"
 #include "StorageConfig.h"
 #include "SensorsConfig.h"
+#include "GattsServer.h"
 
 FILE* open_file(const char * filePrefix){
     std::string filenameString = std::string(std::string("") + filePrefix + std::to_string(fileCount) + ".bin");
@@ -70,7 +70,7 @@ static void run(MPU_t* MPU) {
 
 void runSpiffs(void) {
 
-    static HandReading data[BUFFER_SIZE];
+    
     
     for (size_t i = 0; i < 3; i++)
     {
@@ -110,5 +110,8 @@ extern "C" void app_main()
     // }
     
     initStorage();
-    runSpiffs();
+    // runSpiffs();
+    fillDataStructureSequentially((uint8_t*)data);
+    setDataAddress((uint8_t*)data);
+    init_gatts_server();
 }

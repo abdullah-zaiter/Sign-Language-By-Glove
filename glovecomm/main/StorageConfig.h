@@ -1,6 +1,8 @@
 #include "esp_spiffs.h"
-#define BUFFER_SIZE 4669
+#include "SensorDataType.h"
 
+#define BUFFER_SIZE 50
+HandReading data[BUFFER_SIZE];
 uint fileCount = 1;
 
 void initStorage(void){
@@ -49,4 +51,10 @@ void fillSensorDataStructure(HandReading* readings) {
         }
         readings[i].timestamp = esp_random();
     }
+}
+
+
+void fillDataStructureSequentially(uint8_t* readings) {
+    for (uint16_t i = 0; i < (BUFFER_SIZE*sizeof(HandReading)); i++)
+        readings[i] = i%256;        
 }
