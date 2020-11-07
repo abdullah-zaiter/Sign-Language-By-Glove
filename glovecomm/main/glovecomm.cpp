@@ -100,8 +100,34 @@ void runSpiffs(void) {
     ESP_LOGI(TAG, "SPIFFS unmounted");
 }
 
+static constexpr gpio_num_t GPIO_START = GPIO_NUM_14;
+
+
 extern "C" void app_main()
 {
+
+    
+    gpio_pad_select_gpio(GPIO_START);
+    gpio_set_direction(GPIO_START, GPIO_MODE_INPUT_OUTPUT);
+	gpio_set_level(GPIO_START,false);
+
+    
+
+    int start = 0;
+    while(true) {
+        ESP_LOGI(TAG, "START  = %d", start);
+        start = gpio_get_level(GPIO_START);
+        
+        ESP_LOGI(TAG, "START2  = %d", start);
+        if( start == 1 ) {
+            break;
+        }
+    }
+
+    ESP_LOGI(TAG, "START MAIN");
+
+
+
     // MPU_t* MPU = init();
     // int cnt = 0;
     // while(cnt < 10) {
@@ -115,3 +141,4 @@ extern "C" void app_main()
     setDataAddress((uint8_t*)data);
     init_gatts_server();
 }
+
