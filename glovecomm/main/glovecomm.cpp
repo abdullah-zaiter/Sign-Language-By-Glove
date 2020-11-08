@@ -48,7 +48,7 @@ MPU_t* init(void) {
     return initSensors();
 }
 
-static void run(MPU_t* MPU) {
+static HandReading run(MPU_t* MPU) {
     mpud::raw_axes_t accelRaw;     // holds x, y, z axes as int16
     mpud::raw_axes_t gyroRaw;      // holds x, y, z axes as int16
     HandReading sensors;
@@ -65,7 +65,7 @@ static void run(MPU_t* MPU) {
         sensors.imu[j].gyro[Z] = (__int8_t)(gyroRaw[Z] >> 4);
     }
     // vTaskDelay(100 / portTICK_PERIOD_MS);
-
+    return sensors;
 }
 
 void runSpiffs(void) {
@@ -102,39 +102,39 @@ void runSpiffs(void) {
 
 static constexpr gpio_num_t GPIO_START = GPIO_NUM_14;
 
-
-extern "C" void app_main()
-{
-
-    
+void waitForGPIO() {
     gpio_pad_select_gpio(GPIO_START);
     gpio_set_direction(GPIO_START, GPIO_MODE_INPUT_OUTPUT);
 	gpio_set_level(GPIO_START,false);
-
-    
 
     int start = 0;
     while(true) {
         ESP_LOGI(TAG, "START  = %d", start);
         start = gpio_get_level(GPIO_START);
         
-        ESP_LOGI(TAG, "START2  = %d", start);
         if( start == 1 ) {
             break;
         }
     }
 
     ESP_LOGI(TAG, "START MAIN");
+}
 
+extern "C" void app_main()
+{
 
+    waitForGPIO();
 
-    // MPU_t* MPU = init();
-    // int cnt = 0;
-    // while(cnt < 10) {
-    //     run(MPU);
-    //     cnt++;
-    // }
+    MPU_t* MPU = init();
+    HandReading* currReading = new HandReading[BUFFER_SIZE];
+    int cnt = 0;
+    while(cnt < BUFFER_SIZE) {
+        currReading[cnt] = run(MPU);
+        cnt++;
+    }
     
+    memccpy((uint8_t*)data, currReading, 1, BUFFER_SIZE);
+
     initStorage();
     // runSpiffs();
     fillDataStructureSequentially((uint8_t*)data);
