@@ -54,6 +54,7 @@ MPU_t* initSensors(void) {
 }
 
 void switchGyro(int gyroNum){
+    // gyroNum = 4;
     gpio_set_level(GY1, true);
     gpio_set_level(GY2, true);
     gpio_set_level(GY3, true);
@@ -80,4 +81,46 @@ void switchGyro(int gyroNum){
             gpio_set_level(GY1, false);
             break;
     }
+}
+
+HandReading testSensors(MPU_t* MPU) {
+    mpud::raw_axes_t accelRaw;     // holds x, y, z axes as int16
+    mpud::raw_axes_t gyroRaw;      // holds x, y, z axes as int16
+    HandReading sensors;
+    for(int j = 0; j < SENSORS_QUANTITY; j++)
+    {
+        switchGyro(j);
+        if (j==2)   sensors.timestamp = (uint32_t)(esp_timer_get_time());
+        // MPU->motion(&accelRaw, &gyroRaw);
+        // sensors.imu[j].accel[X] = (__int8_t)(accelRaw[X] >> 4);
+        // sensors.imu[j].accel[Y] = (__int8_t)(accelRaw[Y] >> 4);
+        // sensors.imu[j].accel[Z] = (__int8_t)(accelRaw[Z] >> 4);
+        // sensors.imu[j].gyro[X] = (__int8_t)(gyroRaw[X] >> 4);
+        // sensors.imu[j].gyro[Y] = (__int8_t)(gyroRaw[Y] >> 4);
+        // sensors.imu[j].gyro[Z] = (__int8_t)(gyroRaw[Z] >> 4);
+
+        MPU->motion(&accelRaw, &gyroRaw);
+        mpud::float_axes_t accelG = mpud::accelGravity(accelRaw, mpud::ACCEL_FS_4G);  // raw data to gravity
+        mpud::float_axes_t gyroDPS = mpud::gyroDegPerSec(gyroRaw, mpud::GYRO_FS_500DPS);  // raw data to º/s
+        
+        // Test Sensors
+        printf("Sensor[%d] \t", j);
+        printf("accel: [%+6.2f %+6.2f %+6.2f]", accelG[0], accelG[1], accelG[2]);
+        printf("gyro: [%+7.2f %+7.2f %+7.2f]\n", gyroDPS.x, gyroDPS.y, gyroDPS.z);
+        
+        vTaskDelay(100 / portTICK_PERIOD_MS);			
+
+    }
+    
+    // ESP_LOGI(TAG, "SENSORS READ");
+    // ESP_LOGI(TAG, "SENSORS READ");
+    // ESP_LOGI(TAG, "SENSORS READ");
+    // ESP_LOGI(TAG, "SENSORS READ");
+    // ESP_LOGI(TAG, "SENSORS READ");
+    // ESP_LOGI(TAG, "SENSORS READ");
+    // ESP_LOGI(TAG, "SENSORS READ");
+    // ESP_LOGI(TAG, "SENSORS READ");
+    // ESP_LOGI(TAG, "SENSORS READ");
+    return sensors;
+    // vTaskDelay(100 / portTICK_PERIOD_MS);
 }

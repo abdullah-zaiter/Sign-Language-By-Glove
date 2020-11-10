@@ -129,16 +129,16 @@ extern "C" void app_main()
     HandReading* currReading = new HandReading[BUFFER_SIZE];
     int cnt = 0;
     while(cnt < BUFFER_SIZE) {
-        currReading[cnt] = run(MPU);
+        currReading[cnt] = testSensors(MPU);
         cnt++;
     }
     
-    memccpy((uint8_t*)data, currReading, 1, BUFFER_SIZE);
+    // memccpy((uint8_t*)data, currReading, 1, BUFFER_SIZE);
 
-    initStorage();
-    // runSpiffs();
-    fillDataStructureSequentially((uint8_t*)data);
-    setDataAddress((uint8_t*)data);
-    init_gatts_server();
+    // initStorage();
+    // // runSpiffs();
+    // fillDataStructureSequentially((uint8_t*)data);
+    // setDataAddress((uint8_t*)data);
+    // init_gatts_server();
 }
 
