@@ -65,7 +65,7 @@ static void run(MPU_t* MPU, int count) {
         sensors.imu[j].gyro[Z] = (__int8_t)(gyroRaw[Z] >> 4);
     }
     data[count] = sensors;
-    vTaskDelay(10 / portTICK_PERIOD_MS);
+    // vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
 void runSpiffs(void) {
@@ -137,19 +137,19 @@ extern "C" void app_main()
     ESP_LOGI(TAG, "MPU Init duration %lld us", time_initEND - time_init);
 
     time_init = esp_timer_get_time();
-    int flag = 1;
-    int gpio = 0;
-    while(true) {
-        // testSensors(MPU);
-        gpio = gpio_get_level(GPIO_START);
+    // int flag = 1;
+    // int gpio = 0;
+    // while(true) {
+    //     // testSensors(MPU);
+    //     gpio = gpio_get_level(GPIO_START);
         
-        if( gpio == 1 ) {
-            flag = (flag%5)+1; 
-	        gpio_set_level(GPIO_START,false);
-        }
+    //     if( gpio == 1 ) {
+    //         flag = (flag%5)+1; 
+	//         gpio_set_level(GPIO_START,false);
+    //     }
 
-        testSensor(MPU, flag);
-    }
+    //     testSensor(MPU, flag);
+    // }
 
     int cnt = 0;
     while(cnt < BUFFER_SIZE) {
