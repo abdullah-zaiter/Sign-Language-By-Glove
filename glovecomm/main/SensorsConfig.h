@@ -4,8 +4,8 @@
 #include "mpu/types.hpp"
 #include "inttypes.h"
 
-static constexpr gpio_num_t SCL = GPIO_NUM_19;//VERDE 19
-static constexpr gpio_num_t SDA = GPIO_NUM_18;//AZUL 18
+static constexpr gpio_num_t SCL = GPIO_NUM_19;//LARANJA || VERDE 19
+static constexpr gpio_num_t SDA = GPIO_NUM_18;//AMARELO || AZUL 18
 //static constexpr gpio_num_t AD0 = GPIO_NUM_5;
 static constexpr uint32_t CLOCK = 400000;  // range from 100 KHz ~ 400Hz
 
@@ -54,7 +54,6 @@ MPU_t* initSensors(void) {
 }
 
 void switchGyro(int gyroNum){
-    // gyroNum = 4;
     gpio_set_level(GY1, true);
     gpio_set_level(GY2, true);
     gpio_set_level(GY3, true);
@@ -83,10 +82,34 @@ void switchGyro(int gyroNum){
     }
 }
 
-HandReading testSensors(MPU_t* MPU) {
+
+void testSensor(MPU_t* MPU, int sensor) {
     mpud::raw_axes_t accelRaw;     // holds x, y, z axes as int16
     mpud::raw_axes_t gyroRaw;      // holds x, y, z axes as int16
     HandReading sensors;
+    
+    switchGyro(sensor);
+
+    MPU->motion(&accelRaw, &gyroRaw);
+    mpud::float_axes_t accelG = mpud::accelGravity(accelRaw, mpud::ACCEL_FS_4G);  // raw data to gravity
+    mpud::float_axes_t gyroDPS = mpud::gyroDegPerSec(gyroRaw, mpud::GYRO_FS_500DPS);  // raw data to º/s
+    
+    // Test Sensors
+    printf("Sensor[%d] \t", sensor);
+    printf("accel: [%+6.2f %+6.2f %+6.2f]", accelG[0], accelG[1], accelG[2]);
+    printf("gyro: [%+7.2f %+7.2f %+7.2f]\n", gyroDPS.x, gyroDPS.y, gyroDPS.z);
+    
+    vTaskDelay(100 / portTICK_PERIOD_MS);			
+
+}
+
+void testSensors(MPU_t* MPU) {
+    mpud::raw_axes_t accelRaw;     // holds x, y, z axes as int16
+    mpud::raw_axes_t gyroRaw;      // holds x, y, z axes as int16
+    HandReading sensors;
+
+
+
     for(int j = 0; j < SENSORS_QUANTITY; j++)
     {
         switchGyro(j);
@@ -121,6 +144,4 @@ HandReading testSensors(MPU_t* MPU) {
     // ESP_LOGI(TAG, "SENSORS READ");
     // ESP_LOGI(TAG, "SENSORS READ");
     // ESP_LOGI(TAG, "SENSORS READ");
-    return sensors;
-    // vTaskDelay(100 / portTICK_PERIOD_MS);
 }

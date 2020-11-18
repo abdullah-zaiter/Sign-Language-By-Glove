@@ -1,7 +1,13 @@
 #include "esp_spiffs.h"
 #include "SensorDataType.h"
 
-#define BUFFER_SIZE 1000
+#define BUFFER_SIZE 1902
+
+// com 2870 -> 8.8 segundos
+// com 2000 -> 6 segundos
+// com 1902 -> 6 segundos
+// com 1000 -> 3 segundos
+
 HandReading data[BUFFER_SIZE];
 uint fileCount = 1;
 

@@ -13,6 +13,7 @@
             "request": "launch",
             "name": "PIO Debug",
             "executable": "d:/persn/TG/Github/Sign-Language-By-Glove/glovecomm/.pio/build/lolin_d32/firmware.elf",
+            "projectEnvName": "lolin_d32",
             "toolchainBinDir": "C:/Users/lucas/.platformio/packages/toolchain-xtensa32/bin",
             "preLaunchTask": {
                 "type": "PlatformIO",
@@ -25,6 +26,7 @@
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
             "executable": "d:/persn/TG/Github/Sign-Language-By-Glove/glovecomm/.pio/build/lolin_d32/firmware.elf",
+            "projectEnvName": "lolin_d32",
             "toolchainBinDir": "C:/Users/lucas/.platformio/packages/toolchain-xtensa32/bin",
             "internalConsoleOptions": "openOnSessionStart"
         }

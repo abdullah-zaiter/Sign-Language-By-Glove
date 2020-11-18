@@ -43,15 +43,15 @@ void writeToFile(HandReading* readings, const char* filename){
 }
 
 MPU_t* init(void) {
-    esp_timer_init();
-    initStorage();
+    // initStorage();
     return initSensors();
 }
 
-static HandReading run(MPU_t* MPU) {
+static void run(MPU_t* MPU, int count) {
     mpud::raw_axes_t accelRaw;     // holds x, y, z axes as int16
     mpud::raw_axes_t gyroRaw;      // holds x, y, z axes as int16
     HandReading sensors;
+
     for(int j = 0; j < SENSORS_QUANTITY; j++)
     {
         switchGyro(j);
@@ -64,8 +64,8 @@ static HandReading run(MPU_t* MPU) {
         sensors.imu[j].gyro[Y] = (__int8_t)(gyroRaw[Y] >> 4);
         sensors.imu[j].gyro[Z] = (__int8_t)(gyroRaw[Z] >> 4);
     }
-    // vTaskDelay(100 / portTICK_PERIOD_MS);
-    return sensors;
+    data[count] = sensors;
+    vTaskDelay(10 / portTICK_PERIOD_MS);
 }
 
 void runSpiffs(void) {
@@ -117,28 +117,54 @@ void waitForGPIO() {
         }
     }
 
+	gpio_set_level(GPIO_START,false);
     ESP_LOGI(TAG, "START MAIN");
 }
 
 extern "C" void app_main()
 {
-
+    
+    esp_timer_init();
+    int64_t timeInit = esp_timer_get_time();
+    ESP_LOGI(TAG, "Start Time %lld us", timeInit);
     waitForGPIO();
+    
+    int64_t time_init = esp_timer_get_time();
 
     MPU_t* MPU = init();
-    HandReading* currReading = new HandReading[BUFFER_SIZE];
+
+    int64_t time_initEND = esp_timer_get_time();
+    ESP_LOGI(TAG, "MPU Init duration %lld us", time_initEND - time_init);
+
+    time_init = esp_timer_get_time();
+    int flag = 1;
+    int gpio = 0;
+    while(true) {
+        // testSensors(MPU);
+        gpio = gpio_get_level(GPIO_START);
+        
+        if( gpio == 1 ) {
+            flag = (flag%5)+1; 
+	        gpio_set_level(GPIO_START,false);
+        }
+
+        testSensor(MPU, flag);
+    }
+
     int cnt = 0;
     while(cnt < BUFFER_SIZE) {
-        currReading[cnt] = testSensors(MPU);
+        run(MPU, cnt);
         cnt++;
     }
     
+    time_initEND = esp_timer_get_time();
+    ESP_LOGI(TAG, "MPU RUN duration %lld us", time_initEND - time_init);
     // memccpy((uint8_t*)data, currReading, 1, BUFFER_SIZE);
 
     // initStorage();
     // // runSpiffs();
     // fillDataStructureSequentially((uint8_t*)data);
-    // setDataAddress((uint8_t*)data);
-    // init_gatts_server();
+    setDataAddress((uint8_t*)data);
+    init_gatts_server();
 }
 
